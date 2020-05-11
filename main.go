@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/hectorgabucio/tftbuddy/collector"
-	"github.com/hectorgabucio/tftbuddy/model/app"
+	"github.com/hectorgabucio/tftbuddy/app"
 )
 
 func main() {
