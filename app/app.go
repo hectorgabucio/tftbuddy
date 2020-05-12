@@ -12,5 +12,6 @@ type App struct {
 
 func (a *App) Initialize() {
 	fmt.Println("Initializing app...")
-	a.Collector.CollectDecks()
+	decks := a.Collector.CollectDecks()
+	fmt.Println(decks)
 }

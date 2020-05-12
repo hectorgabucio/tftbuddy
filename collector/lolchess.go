@@ -1,7 +1,6 @@
 package collector
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/gocolly/colly/v2"
@@ -19,28 +18,27 @@ type deckIndex struct {
 func (l *LolChessCollector) CollectDecks() []model.Deck {
 	c := colly.NewCollector()
 
-
-
+	var decks []model.Deck
 
 	// Find and visit all links
 	c.OnHTML("tbody", func(e *colly.HTMLElement) {
-
+		var deck model.Deck
+		currentDeckName := ""
 		e.ForEach(".deck-name .header-name, .tft-champion img, .avgrate span", func(_ int, elDecks *colly.HTMLElement) {
 			if elDecks.Name == "td" {
-				deckName := strings.TrimSpace(elDecks.Text)
-				fmt.Println(deckName)
-				//decks = append(decks, deckName)
+				currentDeckName = strings.TrimSpace(elDecks.Text)
 			} else if elDecks.Name == "img" {
-				fmt.Println(elDecks.Attr("alt"))
+				deck.Name = currentDeckName
+				deck.Champions = append(deck.Champions, model.Champion{Name: elDecks.Attr("alt"), Stars: 1})
 			} else {
-				fmt.Print("\n\n\n")
+				decks = append(decks, deck)
+				deck = model.Deck{}
 			}
 
 		})
-
 	})
 
 	c.Visit("https://lolchess.gg/statistics/meta")
 
-	return nil
+	return decks
 }
