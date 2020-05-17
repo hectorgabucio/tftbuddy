@@ -3,6 +3,7 @@ package collector
 import (
 	"strings"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly/v2"
 	"github.com/hectorgabucio/tftbuddy/model"
 )
@@ -20,22 +21,26 @@ func (l *LolChessCollector) CollectDecks() []model.Deck {
 
 	var decks []model.Deck
 
-	// Find and visit all links
 	c.OnHTML("tbody", func(e *colly.HTMLElement) {
-		var deck model.Deck
-		currentDeckName := ""
-		e.ForEach(".deck-name .header-name, .tft-champion img, .avgrate span", func(_ int, elDecks *colly.HTMLElement) {
-			if elDecks.Name == "td" {
-				currentDeckName = strings.TrimSpace(elDecks.Text)
-			} else if elDecks.Name == "img" {
-				deck.Name = currentDeckName
-				deck.Champions = append(deck.Champions, model.Champion{Name: elDecks.Attr("alt"), Stars: 1})
-			} else {
-				decks = append(decks, deck)
-				deck = model.Deck{}
-			}
 
+		trEl := e.DOM.ChildrenFiltered("tr")
+		var deckName string
+		trEl.Each(func(i int, s *goquery.Selection) {
+
+			if s.AttrOr("class", "") == "deck-name" {
+				deckName = strings.TrimSpace(s.Children().Filter(".header-name").Text())
+			} else {
+				deck := model.Deck{Name: deckName}
+				unitsEl := s.ChildrenFiltered("td.units-list").ChildrenFiltered(".units").ChildrenFiltered(".unit")
+
+				unitsEl.Each(func(j int, unit *goquery.Selection) {
+					champName := unit.ChildrenFiltered(".tft-champion").ChildrenFiltered("img").AttrOr("alt", "ERROR")
+					deck.Champions = append(deck.Champions, model.Champion{Name: champName, Stars: 1})
+				})
+				decks = append(decks, deck)
+			}
 		})
+
 	})
 
 	c.Visit("https://lolchess.gg/statistics/meta")
