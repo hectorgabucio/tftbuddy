@@ -5,3 +5,5 @@
 - [ ] Go doc
 - [ ] Server caching
 - [ ] Makefile
+- [ ] HTTPS
+- [ ] GolangCILint
