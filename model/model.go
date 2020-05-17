@@ -2,7 +2,7 @@ package model
 
 type Champion struct {
 	Name  string
-	Stars uint32
+	Stars int
 }
 
 type Deck struct {

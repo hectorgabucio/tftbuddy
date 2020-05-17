@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -35,7 +36,14 @@ func (l *LolChessCollector) CollectDecks() []model.Deck {
 
 				unitsEl.Each(func(j int, unit *goquery.Selection) {
 					champName := unit.ChildrenFiltered(".tft-champion").ChildrenFiltered("img").AttrOr("alt", "ERROR")
-					deck.Champions = append(deck.Champions, model.Champion{Name: champName, Stars: 1})
+					champStars := unit.ChildrenFiltered(".stars").AttrOr("src", "ERROR")
+					starsStr := strings.Split(champStars, ".png")[0]
+					stars, err := strconv.Atoi(starsStr[len(starsStr)-1:])
+					if err != nil {
+						panic(err)
+					}
+
+					deck.Champions = append(deck.Champions, model.Champion{Name: champName, Stars: stars})
 				})
 				decks = append(decks, deck)
 			}
